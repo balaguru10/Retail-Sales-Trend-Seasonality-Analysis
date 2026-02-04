@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Analysis Report</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="bg-blur"></div>
+
+  <div class="container">
+    <header class="topbar">
+      <a class="link" href="{{ url_for('index') }}">← Back</a>
+      <div class="title">
+        <h1>Retail Sales Analysis Report</h1>
+        <p class="muted">Decomposition Period: <b>{{ period }}</b></p>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Dataset Summary</h2>
+      <div class="stats">
+        <div class="stat"><span>Rows</span><b>{{ summary.rows }}</b></div>
+        <div class="stat"><span>Start</span><b>{{ summary.start }}</b></div>
+        <div class="stat"><span>End</span><b>{{ summary.end }}</b></div>
+        <div class="stat"><span>Mean</span><b>{{ "%.2f"|format(summary.mean) }}</b></div>
+        <div class="stat"><span>Min</span><b>{{ "%.2f"|format(summary.min) }}</b></div>
+        <div class="stat"><span>Max</span><b>{{ "%.2f"|format(summary.max) }}</b></div>
+        <div class="stat"><span>Std</span><b>{{ "%.2f"|format(summary.std) }}</b></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Stationarity (ADF Test)</h2>
+      <div class="pill {{ 'ok' if stationary else 'warn' }}">
+        {% if stationary %}
+          Stationary ✅ (p-value < 0.05)
+        {% else %}
+          Non-Stationary ⚠️ (p-value ≥ 0.05)
+        {% endif %}
+      </div>
+
+      <div class="two-col">
+        <div class="box">
+          <h3>ADF on Original Series</h3>
+          <ul class="kvs">
+            <li><span>ADF Statistic</span><b>{{ "%.5f"|format(adf.adf_stat) }}</b></li>
+            <li><span>p-value</span><b>{{ "%.5f"|format(adf.p_value) }}</b></li>
+            <li><span>Lags</span><b>{{ adf.lags }}</b></li>
+            <li><span>N Obs</span><b>{{ adf.nobs }}</b></li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>ADF after 1st Differencing</h3>
+          <ul class="kvs">
+            <li><span>ADF Statistic</span><b>{{ "%.5f"|format(adf_diff.adf_stat) }}</b></li>
+            <li><span>p-value</span><b>{{ "%.5f"|format(adf_diff.p_value) }}</b></li>
+            <li><span>Lags</span><b>{{ adf_diff.lags }}</b></li>
+            <li><span>N Obs</span><b>{{ adf_diff.nobs }}</b></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Key Plots (Inline)</h2>
+      <div class="plot-grid">
+        <div class="plot-card">
+          <h3>Trend Plot</h3>
+          <img src="data:image/png;base64,{{ images.trend }}" alt="trend">
+        </div>
+
+        <div class="plot-card">
+          <h3>Decomposition</h3>
+          <img src="data:image/png;base64,{{ images.decomp }}" alt="decomposition">
+        </div>
+
+        <div class="plot-card">
+          <h3>ACF</h3>
+          <img src="data:image/png;base64,{{ images.acf }}" alt="acf">
+        </div>
+
+        <div class="plot-card">
+          <h3>PACF</h3>
+          <img src="data:image/png;base64,{{ images.pacf }}" alt="pacf">
+        </div>
+
+        <div class="plot-card">
+          <h3>Differenced Series</h3>
+          <img src="data:image/png;base64,{{ images.diff }}" alt="diff">
+        </div>
+      </div>
+      <p class="muted" style="margin-top:10px;">
+        Note: Plots are rendered inline from memory (no .png files saved in your project folder).
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Insights</h2>
+      <ul class="bullets">
+        {% for item in insights %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <footer class="footer">
+      <span>Tip: period=7 for weekly seasonality, period=30 for monthly-ish.</span>
+    </footer>
+  </div>
+</body>
+</html>
